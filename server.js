@@ -71,6 +71,9 @@ const memorySchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  special:{
+    type:Boolean
   }
 });
 
@@ -96,12 +99,13 @@ app.post('/api/memories', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'Image is required' });
     }
 
-    const { title, date, description } = req.body;
+    const { title, date, description,special } = req.body;
     
     const newMemory = new Memory({
       title,
       date,
       description,
+      special,
       imageUrl: req.file.path,
       imagePublicId: req.file.filename
     });
@@ -145,14 +149,15 @@ app.delete('/api/memories/:id', async (req, res) => {
         return res.status(404).json({ error: 'Memory not found' });
       }
       
-      const { title, date, description } = req.body;
+      const { title, date, description,special } = req.body;
       
       // Update memory data
       memory.title = title || memory.title;
       memory.date = date || memory.date;
       memory.description = description || memory.description;
+      memory.special = special || memory.special;
       
-      // If a new image is uploaded
+      // If a new image is uploacd ded
       if (req.file) {
         // Delete old image from Cloudinary
         await cloudinary.uploader.destroy(memory.imagePublicId);
