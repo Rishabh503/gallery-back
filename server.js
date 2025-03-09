@@ -79,8 +79,97 @@ const memorySchema = new mongoose.Schema({
 
 const Memory = mongoose.model('Memory', memorySchema);
 
+const groupSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: {
+    type: String
+  },
+  memoryIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Memory'
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const Group = mongoose.model('Group', groupSchema);
+
 // API Routes
 
+
+// Get all groups
+app.get('/api/groups', async (req, res) => {
+  try {
+    const groups = await Group.find();
+    res.json(groups);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Create a new group
+app.post('/api/groups', async (req, res) => {
+  try {
+    const { name, description, memoryIds } = req.body;
+    
+    const newGroup = new Group({
+      name,
+      description,
+      memoryIds: memoryIds || []
+    });
+
+    const savedGroup = await newGroup.save();
+    res.status(201).json(savedGroup);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update a group
+app.put('/api/groups/:id', async (req, res) => {
+  try {
+    const { name, description, memoryIds } = req.body;
+    
+    const updatedGroup = await Group.findByIdAndUpdate(
+      req.params.id,
+      { name, description, memoryIds },
+      { new: true }
+    );
+    
+    if (!updatedGroup) {
+      return res.status(404).json({ error: 'Group not found' });
+    }
+    
+    res.json(updatedGroup);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Delete a group
+app.delete('/api/groups/:id', async (req, res) => {
+  try {
+    const deletedGroup = await Group.findByIdAndDelete(req.params.id);
+    
+    if (!deletedGroup) {
+      return res.status(404).json({ error: 'Group not found' });
+    }
+    
+    res.json({ message: 'Group deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+})
 // Get all memories
 app.get('/api/memories', async (req, res) => {
   try {
