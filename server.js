@@ -73,7 +73,7 @@ const memorySchema = new mongoose.Schema({
     default: Date.now
   },
   special:{
-    type:Boolean
+    type:String
   }
 });
 
